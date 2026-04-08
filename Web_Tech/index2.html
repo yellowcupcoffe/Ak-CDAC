@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Appointment Form</title>
+</head>
+<body>
+
+<h2>Pet Appointment Schedule Form</h2>
+
+<form id="petForm">
+    <label>Pet Name:</label>
+    <input type="text" name="PetName" required><br><br>
+
+    <label>Age:</label>
+    <input type="number" name="Age" required><br><br>
+
+    <label>Type:</label>
+    <input type="text" name="Type" required><br><br>
+
+    <label>Breed:</label>
+    <input type="text" name="Breed" required><br><br>
+
+    <label>Owner Name:</label>
+    <input type="text" name="OwnerName" required><br><br>
+
+    <label>Appointment Date:</label>
+    <input type="date" name="Appointment" required><br><br>
+
+    <label>Owner Contact Number:</label>
+    <input type="number" name="OCN" required><br><br>
+
+    <button type="submit">Submit</button>
+    <button type="button" onclick="window.location.href='dashboard.html'">
+        View Dashboard
+    </button>
+</form>
+
+<script>
+const form = document.getElementById('petForm');
+
+form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const dataObj = {};
+    formData.forEach((value, key) => dataObj[key] = value);
+
+    try {
+        const response = await fetch('/api/appointments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dataObj)
+        });
+        const result = await response.json();
+        alert(result.message);
+        form.reset();
+    } catch (err) {
+        console.error(err);
+        alert('Error saving appointment');
+    }
+});
+</script>
+
+</body>
+</html>
