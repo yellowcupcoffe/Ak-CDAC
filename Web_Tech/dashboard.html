@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Appointments Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+        th { background-color: #333; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<h2>Pet Appointments Dashboard</h2>
+<table id="appointmentsTable">
+    <thead>
+        <tr>
+            <th>Pet Name</th>
+            <th>Age</th>
+            <th>Type</th>
+            <th>Breed</th>
+            <th>Owner Name</th>
+            <th>Appointment Date</th>
+            <th>Owner Contact</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+async function loadAppointments() {
+    try {
+        const response = await fetch('/api/appointments');
+        const appointments = await response.json();
+        const tbody = document.querySelector('#appointmentsTable tbody');
+        tbody.innerHTML = '';
+
+        appointments.forEach(app => {
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td contenteditable="true" data-field="PetName">${app.PetName}</td>
+                <td contenteditable="true" data-field="Age">${app.Age}</td>
+                <td contenteditable="true" data-field="Type">${app.Type}</td>
+                <td contenteditable="true" data-field="Breed">${app.Breed}</td>
+                <td contenteditable="true" data-field="OwnerName">${app.OwnerName}</td>
+                <td contenteditable="true" data-field="Appointment">${new Date(app.Appointment).toISOString().split('T')[0]}</td>
+                <td contenteditable="true" data-field="OCN">${app.OCN}</td>
+                <td><button class="save-btn">Save</button></td>
+            `;
+
+            tr.querySelector('.save-btn').addEventListener('click', async () => {
+                const updatedData = {};
+                tr.querySelectorAll('td[contenteditable="true"]').forEach(td => {
+                    const field = td.getAttribute('data-field');
+                    updatedData[field] = td.innerText;
+                });
+
+                try {
+                    const res = await fetch(`/api/appointments/${app._id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatedData)
+                    });
+                    const result = await res.json();
+                    alert(result.message);
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to update appointment');
+                }
+            });
+
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error('Error loading appointments:', err);
+        alert('Failed to load appointments');
+    }
+}
+
+window.onload = loadAppointments;
+</script>
+
+</body>
+</html>
